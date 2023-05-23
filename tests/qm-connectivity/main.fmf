@@ -1,0 +1,7 @@
+summary: Concise summary describing what the test does
+test:
+  /bin/bash ../e2e/lib/tests
+environment:
+    NODES_FOR_TESTING: ("control" "node1")
+    CONTROL_CONTAINER_NAME: "control"
+tier: 0

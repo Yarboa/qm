@@ -55,6 +55,7 @@ ARGUMENT_LIST=(
   "branch-qm"
   "build-hirte-from-gh-url"
   "branch-hirte"
+  "skip-tests"
 )
 
 usage() {
@@ -72,6 +73,8 @@ usage() {
 	echo -e "\tBuild HIRTE from a specific GitHub URL, useful for testing new features"
 	echo "--branch-hirte"
 	echo -e "\tSpecify which branch the GitHub repo will be set. Requires --build-hirte-from-gh-url"
+	echo "--skip-tests"
+	echo -e "\tSpecify to avoid testing. --skip-tests"
 	echo
 	echo "Examples:"
 	echo
@@ -126,6 +129,11 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
 
+    --skip-tests)
+      SKIP_TESTS="${2}"
+      shift 2
+      ;;
+
     --help)
       usage
       shift 2
@@ -177,11 +185,24 @@ info_message "Preparing QM environment"
 info_message "=============================="
 
 # Creates the node container - a.k.a QM
+
+if [ "${SKIP_TESTS}" == "yes" ]; then
+  echo
+  info_message "skip tests"
+  info_message "=============================="
+  exit 0
+fi
 create_qm_node
 
 # Create pods regarding QM services
 srvs_qm=("radio" "store" "stream_audio" "maps")
 create_stub_systemd_srv "node1" "qm" "${srvs_qm[@]}"
+
+if [ "${SKIP_TESTS}" == "yes" ]; then
+  info_message "skip tests"
+  info_message "=============================="
+  exit 0
+fi
 
 # Tests
 echo
