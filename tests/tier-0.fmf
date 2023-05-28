@@ -1,10 +1,18 @@
 summary: Tier 0 - QM Interconnect
+
+environment:
+     PASSWD: Aa123456
+
 discover:
     how: fmf
     filter: tier:0
 
 provision:
    how: local
+#   how: connect
+#   guest: 
+#   user: root
+#   password: 
 
 prepare:
   - name: Prepare Repos
@@ -13,18 +21,18 @@ prepare:
         dnf install -y 	dnf-plugin-config-manager epel-release
         dnf config-manager -y --set-enabled crb
         dnf -y copr enable rhcontainerbot/qm centos-stream-9
-        dnf -y update
 
   - name: install repos
     how: install
     package:
       - podman
 
-  - name: Set QM env 
+  - name: Enable login
     how: shell
     script: |
-        cd tests/e2e
-        bash ./run-test-e2e --skip-tests=yes
+         echo $PASSWD | passwd --stdin root
+         sed 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+         systemctl restart sshd
 
 context:
     distro: qm 

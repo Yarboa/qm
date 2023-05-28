@@ -1,0 +1,5 @@
+summary: Concise summary describing what the test does
+test:
+  sleep 2h
+duration: 2h
+tier: 0
