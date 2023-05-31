@@ -1,0 +1,19 @@
+name: pre-commit checks
+on: pull_request
+jobs:
+  flake8:
+    name: Check code with precommit
+    runs-on: ubuntu-20.04
+    container: fedora:38
+    steps:
+      - name: Install Pipenv and Git
+        run: dnf install -y python3 git
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Setup environment
+        run: |
+           pip install pre-commit
+           pre-commit install
+      - name: Run Flake8
+        run: pre-commit run --file tests/e2e/
+
