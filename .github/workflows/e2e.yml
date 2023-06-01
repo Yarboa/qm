@@ -1,0 +1,26 @@
+name: Schedule test on Testing Farm
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo and switch to corresponding pull request
+        uses: actions/checkout@v2
+        with:
+          git_ref: "refs/pull/${{ github.event.issue.number }}/head"
+
+      - name: Schedule test on Testing Farm
+        uses: sclorg/testing-farm-as-github-action@v1
+        with:
+          api_key: ${{ secrets.TF_API_KEY }}
+          git_url: https://github.com/containers/qm.git
+          tmt_plan_regex: "/tests/e2e/tier-0"
+          pull_request_status_name: "CSS9-QM"
+          compose: "CentOS-Stream-9"
