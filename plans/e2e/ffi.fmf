@@ -16,18 +16,6 @@ adjust:
         how: install
         package: podman
 
-      - name: Set QM partition
-        how: shell
-        script: |
-             echo $(fdisk -l)
-             echo $(lsblk)
-             echo $(blkid)
-#            (echo n; echo p; echo 2; echo ; echo ; echo w) | fdisk /dev/vda
-#            mkfs.xfs /dev/vda2
-#            mkdir /var/qm
-#            mount /dev/vda2 /var/qm
-#            xfs_growfs /var/qm
-
       - name: Set QM env
         how: shell
         script: |
