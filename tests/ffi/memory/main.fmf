@@ -1,6 +1,6 @@
 summary: Test is calling systemd as stand alone test
 test:
-    /bin/bash ./test.sh
+    /bin/bash -x ./test.sh
 duration: 10m
 tag: ffi
 
