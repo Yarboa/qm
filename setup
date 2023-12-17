@@ -11,7 +11,7 @@ INSTALLDIR="/usr/share/qm"
 ROOTFS="/usr/lib/qm/rootfs"
 RWETCFS="/etc/qm"
 RWVARFS="/var/qm"
-TMP_QM_IMG_DIR="tmp-img-dir"
+TMP_QM_IMG_DIR="tmp.images"
 AGENT_HOSTNAME="$(hostname)"
 AGENTCONF="/etc/bluechi/agent.conf.d/agent.conf"
 QM_CONTAINER_IDS=1000000000:1500000000
@@ -98,12 +98,26 @@ storage() {
 	touch "${ROOTFS}/var/lib/shared/overlay-images/images.lock" \
 	      "${ROOTFS}/var/lib/shared/overlay-layers/layers.lock"
 
-	sed -e '/additionalimage.*/a "/var/lib/shared",' \
-	    -e 's|^#.*transient_store.*|transient_store=true|g' \
-	    "${ROOTFS}/usr/share/containers/storage.conf" \
-	    > "${ROOTFS}/etc/containers/storage.conf"
-        sed -i "s|^#env = \[\]|env = \[\"TMPDIR=/var/${TMP_QM_IMG_DIR}\"\]|" \
-            "${ROOTFS}/usr/share/containers/containers.conf"
+        sed -e '/^\s*#/d' -e  '/^$/d'
+            "${ROOTFS}/usr/share/containers/containers.conf" \
+            > "${ROOTFS}/etc/containers/containers.conf"
+        if ! grep -q "additionalimagestores" "${ROOTFS}/etc/containers/containers.conf"; then
+            cat >> "${ROOTFS}/etc/containers/containers.conf" << EOF
+additionalimagestores = [
+/var/lib/shared,
+]
+EOF
+        else
+           sed -i '/additionalimage.*/a "/var/lib/shared",'
+           "${ROOTFS}/etc/containers/storage.conf"
+        fi
+        if ! grep -q "transient_store" "${ROOTFS}/etc/containers/storage.conf"; then
+           echo transient_store=true >> "${ROOTFS}/etc/containers/storage.conf"
+        fi
+        if ! grep -q "env" "${ROOTFS}/etc/containers/storage.conf"; then
+            echo "env = \[\"TMPDIR=/var/${TMP_QM_IMG_DIR}\"\]" \
+            >>  "${ROOTFS}/etc/containers/containers.conf"
+        fi
     fi
 }
 
@@ -245,17 +259,18 @@ case "$1" in
 	    fi
     fi
 
-	install "${ROOTFS}" "${RWETCFS}" "${RWVARFS}"
+	install "${ROOTFS} ${RWETCFS} ${RWVARFS}"
 	replaceIDs /etc/subuid qmcontainers ${QM_CONTAINER_IDS}
 	replaceIDs /etc/subgid qmcontainers ${QM_CONTAINER_IDS}
 	replaceIDs /etc/subuid containers   ${CONTAINER_IDS}
 	replaceIDs /etc/subgid containers   ${CONTAINER_IDS}
 
     if [ "$SYSTEMCTL_SKIP" == "N" ]; then
-	    systemctl daemon-reload
-	    systemctl start qm.service
+	systemctl daemon-reload
+	systemctl start qm.service
     else
       /usr/libexec/podman/quadlet /run/systemd/generator/
     fi
 	;;
+
 esac

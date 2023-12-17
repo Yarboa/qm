@@ -25,7 +25,7 @@ adjust:
         how: shell
         script: |
            cd tests/e2e
-           ./run-test-e2e --skip-tests=yes
+           ./run-test-e2e --skip-tests=yes --branch-qm=fix-tier-0 --build-qm-from-gh-url=https://github.com/Yarboa/qm.git
    when: distro == centos-stream-9 or distro == fedora
 
 execute:
