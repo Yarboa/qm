@@ -276,8 +276,9 @@ fi
 echo
 info_message "Checking if QM already installed"
 info_message "=============================="
+QM_INST="$(rpm -qa qm)"
 QM_STATUS="$(systemctl is-enabled qm 2>&1)"
-if [ "$QM_STATUS" == "generated" ]; then
+if [[ -n "$QM_INST" && "$QM_STATUS" == "generated" ]]; then
    if [ "$(systemctl is-active qm)" == "active" ]; then
        info_message "QM Enabled and Active"
        info_message "=============================="
