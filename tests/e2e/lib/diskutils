@@ -56,7 +56,9 @@ select_disk_to_partition(){
         fi
       fi
   done
-  parted /dev/${DISK} rescan
+  if ! grep -qi "${QC_SOC}" "${SOC_DISTRO_FILE}"; then
+     parted /dev/${DISK} rescan
+  fi
 }
 
 create_qm_var_part() {
